@@ -22,6 +22,10 @@ function registerEvents(){
     saveToIndexedDB();
   })
   document.getElementsByClassName("back-button")[0].addEventListener("click",function(){
+    const newURL = window.location.origin + window.location.pathname;
+    if (newURL != window.location.href) {
+      history.pushState(null, null, newURL);
+    }
     switchPage(0);
   })
   document.getElementsByClassName("search-button")[0].addEventListener("click",function(){
@@ -58,7 +62,7 @@ async function loadFilesList(){
     link.href="javascript:void(0);";
     link.innerText = key;
     link.addEventListener("click",function(){
-      const newURL = window.location.origin + window.location.pathname + "?filename=" + encodeURIComponent(currentFileName);
+      const newURL = window.location.origin + window.location.pathname + "?filename=" + encodeURIComponent(key);
       if (newURL != window.location.href) {
         history.pushState(null, null, newURL);
       }
