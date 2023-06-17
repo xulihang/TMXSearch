@@ -9,6 +9,7 @@ let indexStore = localforage.createInstance({
 let currentFileName = "";
 let tuList = [];
 let documentIndex = undefined;
+let currentPageIndex = 0;
 
 document.addEventListener("DOMContentLoaded",function(){
   registerEvents();
@@ -22,11 +23,16 @@ function registerEvents(){
     saveToIndexedDB();
   })
   document.getElementsByClassName("back-button")[0].addEventListener("click",function(){
-    const newURL = window.location.origin + window.location.pathname;
-    if (newURL != window.location.href) {
-      history.pushState(null, null, newURL);
+    if (currentPageIndex === 1) {
+      const newURL = window.location.origin + window.location.pathname;
+      updateHistory(newURL);
+      switchPage(0);
+    }else{
+      const newURL = window.location.origin + window.location.pathname+"?filename="+encodeURIComponent(currentFileName);
+      updateHistory(newURL);
+      switchPage(1);
     }
-    switchPage(0);
+
   })
   document.getElementsByClassName("search-button")[0].addEventListener("click",function(){
     search();
@@ -63,9 +69,7 @@ async function loadFilesList(){
     link.innerText = key;
     link.addEventListener("click",function(){
       const newURL = window.location.origin + window.location.pathname + "?filename=" + encodeURIComponent(key);
-      if (newURL != window.location.href) {
-        history.pushState(null, null, newURL);
-      }
+      updateHistory(newURL);
       switchPage(1);
       createIndexIfNeeded(key);
     })
@@ -78,12 +82,20 @@ function switchPage(index) {
   if (index === 0) {
     document.getElementsByClassName("home")[0].style.display = "";
     document.getElementsByClassName("search")[0].style.display = "none";
+    document.getElementsByClassName("viewer")[0].style.display = "none";
     document.getElementsByClassName("back-button")[0].style.display = "none";
-  }else{
+  }else if(index === 1) {
     document.getElementsByClassName("home")[0].style.display = "none";
     document.getElementsByClassName("search")[0].style.display = "";
+    document.getElementsByClassName("viewer")[0].style.display = "none";
+    document.getElementsByClassName("back-button")[0].style.display = "";
+  }else{
+    document.getElementsByClassName("home")[0].style.display = "none";
+    document.getElementsByClassName("search")[0].style.display = "none";
+    document.getElementsByClassName("viewer")[0].style.display = "";
     document.getElementsByClassName("back-button")[0].style.display = "";
   }
+  currentPageIndex = index;
 }
 
 async function createIndexIfNeeded(name){
@@ -235,16 +247,19 @@ function search(){
     }
   }
   const newURL = window.location.origin + window.location.pathname + "?filename=" + encodeURIComponent(currentFileName) + "&keywords=" + encodeURIComponent(keywords);
-  if (newURL != window.location.href) {
-    history.pushState(null, null, newURL);
-  }
+  updateHistory(newURL);
 }
 
 function buildSearchResultItem(count,resultIndex,tu){
   const container = document.createElement("div");
   const title = document.createElement("h3");
   const link = document.createElement("a");
-  link.href = "";
+  link.href = "javascript:void(0);";
+  link.addEventListener("click",function(){
+    const newURL = window.location.origin + window.location.pathname + "?filename=" + encodeURIComponent(currentFileName) + "&nearBy=" + encodeURIComponent(resultIndex);
+    updateHistory(newURL);
+    viewSegmentsNearBy(resultIndex);
+  })
   link.innerText = count;
   title.appendChild(link);
   const text = document.createElement("div");
@@ -291,4 +306,35 @@ function createSearchFields(){
     fields.push(select.selectedOptions[0].value);
   }
   return fields;
+}
+
+function viewSegmentsNearBy(id){
+  switchPage(2);
+  const viewer = document.getElementsByClassName("viewer")[0];
+  viewer.innerHTML = "";
+  const beginIndex = Math.max(0, id - 7);
+  const endIndex = Math.min(tuList.length - 1, id + 7);
+  let count = 1;
+  for (let index = beginIndex; index <= endIndex; index++) {
+    const tu = tuList[index];
+    const item = document.createElement("div");
+    const title = document.createElement("h3");
+    title.innerText = count;
+    if (index === id) {
+      title.id = "matched";
+    }
+    const content = document.createElement("p");
+    content.innerHTML = getContent(tu);
+    item.appendChild(title);
+    item.appendChild(content);
+    viewer.appendChild(item);
+    count = count + 1;
+  }
+  window.scrollTo(document.getElementById("matched").offsetLeft,document.getElementById("matched").offsetTop);
+}
+
+function updateHistory(newURL){
+  if (newURL != window.location.href) {
+    history.pushState(null, null, newURL);
+  }
 }
