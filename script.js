@@ -77,6 +77,11 @@ function registerEvents(){
   document.getElementsByClassName("search-button")[0].addEventListener("click",function(){
     search();
   })
+  document.getElementsByClassName("keywords")[0].addEventListener("keydown",async function(event){
+    if (event.code === "Enter") {
+      search();
+    }
+  });
 }
 
 function saveToIndexedDB(){
