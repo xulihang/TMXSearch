@@ -32,6 +32,7 @@ function registerEvents(){
       updateHistory(newURL);
       switchPage(1);
     }
+    window.scrollTo(0,0);
 
   })
   document.getElementsByClassName("search-button")[0].addEventListener("click",function(){
