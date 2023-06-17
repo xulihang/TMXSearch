@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<tmx version="1.4">
+    <header>
+        <creationtool>BasicCAT</creationtool>
+        <creationtoolversion>1.0.0</creationtoolversion>
+        <adminlang>en</adminlang>
+        <srclang>en</srclang>
+        <segtype>sentence</segtype>
+        <o-tmf>BasicCAT</o-tmf>
+    </header>
+    <body>
+        <tu>
+            <note>Friends.S01E01.chs&amp;eng.sohu.ass
+0:00:49.86,0:00:51.17</note>
+            <tuv xml:lang="en">
+                <seg>There&apos;s nothing to tell!</seg>
+            </tuv>
+            <tuv xml:lang="zh">
+                <seg>这没什么好说的</seg>
+            </tuv>
+        </tu>
+        <tu>
+            <note>Friends.S01E01.chs&amp;eng.sohu.ass
+0:00:51.17,0:00:53.04</note>
+            <tuv xml:lang="en">
+                <seg>He&apos;s just some guy I work with!</seg>
+            </tuv>
+            <tuv xml:lang="zh">
+                <seg>他不过是我的同事</seg>
+            </tuv>
+        </tu>
+        <tu>
+            <note>Friends.S01E01.chs&amp;eng.sohu.ass
+0:00:53.04,0:00:55.29</note>
+            <tuv xml:lang="en">
+                <seg>C&apos;mon you&apos;re going out with the guy!</seg>
+            </tuv>
+            <tuv xml:lang="zh">
+                <seg>少来了  你们都在约会了</seg>
+            </tuv>
+        </tu>
+    </body>
+</tmx>
