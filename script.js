@@ -15,7 +15,37 @@ document.addEventListener("DOMContentLoaded",function(){
   registerEvents();
   loadFilesList();
   switchPage(0);
+  parseParams();
 })
+
+async function parseParams(){
+  const filename = getURLParameter("filename");
+  const keywords = getURLParameter("keywords");
+  const nearBy = getURLParameter("nearBy");
+  if (filename) {
+    switchPage(1);
+    await createIndexIfNeeded(filename);
+    if (keywords) {
+      document.getElementsByClassName("keywords")[0].value = keywords;
+      search();
+    }else if (nearBy) {
+      switchPage(2);
+      viewSegmentsNearBy(parseInt(nearBy));
+    }
+  }
+}
+
+function getURLParameter(key) {
+  let paramString = window.location.href.split('?')[1];
+  let queryString = new URLSearchParams(paramString);
+  for(let pair of queryString.entries()) {
+    if (pair[0] === key) {
+      return pair[1];
+    }
+  }
+  return undefined;
+}
+
 
 
 function registerEvents(){
