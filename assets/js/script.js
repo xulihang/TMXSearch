@@ -110,7 +110,7 @@ function saveToIndexedDB(){
 function downloadAndSaveToIndexedDB(filename){
   return new Promise(function (resolve, reject) {
     let xhr = new XMLHttpRequest();
-    xhr.open('GET', './'+filename);
+    xhr.open('GET', '/'+filename);
     xhr.onreadystatechange = async function(){
       if(xhr.readyState === 4){
         await tmxStore.setItem(filename,xhr.responseText);
@@ -160,7 +160,7 @@ function buildFileItem(filename){
 function loadRemoteFilesList(){
   return new Promise(function (resolve, reject) {
     let xhr = new XMLHttpRequest();
-    xhr.open('GET', './filesList.json');
+    xhr.open('GET', '/TMXFilesList.json');
     xhr.onreadystatechange = function(){
       if(xhr.readyState === 4){
         let files = JSON.parse(xhr.responseText);
@@ -202,14 +202,14 @@ async function createIndexIfNeeded(name){
   if (currentFileName != name) {
     let xml = await tmxStore.getItem(name);
     if (!xml) {
-      updateStatus("下载XML中……");
+      updateStatus(localize("下载XML中……"));
       await downloadAndSaveToIndexedDB(name);
       xml = await tmxStore.getItem(name);
     }
-    updateStatus("解析XML中……");
+    updateStatus(localize("解析XML中……"));
     await sleep(100);
     tuList = await parseXML(xml,name);
-    updateStatus("建立索引中……");
+    updateStatus(localize("建立索引中……"));
     await sleep(100);
     createIndex();
     updateStatus("");
@@ -453,3 +453,18 @@ async function deleteCurrentFile(){
     switchPage(0);
   }
 }
+
+function localize(str){
+  if (window.location.pathname.indexOf("/zh") === -1) {
+    let translations = {
+      "下载XML中……":"Downloading XML...",
+      "解析XML中……":"Parsing XML...",
+      "建立索引中……":"Indexing..."
+    }
+    if (str in translations) {
+      return translations[str];
+    }
+  }
+  return str;
+}
+
