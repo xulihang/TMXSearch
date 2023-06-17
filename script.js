@@ -18,6 +18,10 @@ document.addEventListener("DOMContentLoaded",function(){
   parseParams();
 })
 
+window.addEventListener("popstate", (event) => {
+  parseParams();
+});
+
 async function parseParams(){
   const filename = getURLParameter("filename");
   const keywords = getURLParameter("keywords");
@@ -31,7 +35,11 @@ async function parseParams(){
     }else if (nearBy) {
       switchPage(2);
       viewSegmentsNearBy(parseInt(nearBy));
+    }else{
+      document.getElementsByClassName("search-results")[0].innerHTML = "";
     }
+  }else{
+    switchPage(0);
   }
 }
 
