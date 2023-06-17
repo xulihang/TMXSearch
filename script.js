@@ -10,9 +10,11 @@ let currentFileName = "";
 let tuList = [];
 let documentIndex = undefined;
 let currentPageIndex = 0;
+let remoteFiles = [];
 
-document.addEventListener("DOMContentLoaded",function(){
+document.addEventListener("DOMContentLoaded",async function(){
   registerEvents();
+  remoteFiles = await loadRemoteFilesList();
   loadFilesList();
   switchPage(0);
   parseParams();
@@ -102,25 +104,72 @@ function saveToIndexedDB(){
   fileReader.readAsText(file);
 }
 
+function downloadAndSaveToIndexedDB(filename){
+  return new Promise(function (resolve, reject) {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', './'+filename);
+    xhr.onreadystatechange = async function(){
+      if(xhr.readyState === 4){
+        await tmxStore.setItem(filename,xhr.responseText);
+        resolve();
+      }
+    }
+    xhr.onerror = function(){
+      console.log("error");
+      reject();
+    }
+    xhr.send();
+  });
+  
+}
+
 async function loadFilesList(){
   const keys = await tmxStore.keys();
   const filesList = document.getElementsByClassName("files-list")[0];
   filesList.innerHTML = "";
   for (const key of keys) {
-    console.log(key);
-    const item = document.createElement("li");
-    const link = document.createElement("a");
-    link.href="javascript:void(0);";
-    link.innerText = key;
-    link.addEventListener("click",function(){
-      const newURL = window.location.origin + window.location.pathname + "?filename=" + encodeURIComponent(key);
-      updateHistory(newURL);
-      switchPage(1);
-      createIndexIfNeeded(key);
-    })
-    item.appendChild(link);
+    const item = buildFileItem(key);
     filesList.appendChild(item);
   }
+  for (const filename of remoteFiles) {
+    if (keys.indexOf(filename) === -1) {
+      const item = buildFileItem(filename);
+      filesList.appendChild(item);
+    }
+  }
+}
+
+function buildFileItem(filename){
+  const item = document.createElement("li");
+  const link = document.createElement("a");
+  link.href="javascript:void(0);";
+  link.innerText = filename;
+  link.addEventListener("click",function(){
+    const newURL = window.location.origin + window.location.pathname + "?filename=" + encodeURIComponent(filename);
+    updateHistory(newURL);
+    switchPage(1);
+    createIndexIfNeeded(filename);
+  })
+  item.appendChild(link);
+  return item;
+}
+
+function loadRemoteFilesList(){
+  return new Promise(function (resolve, reject) {
+    let xhr = new XMLHttpRequest();
+    xhr.open('GET', './filesList.json');
+    xhr.onreadystatechange = function(){
+      if(xhr.readyState === 4){
+        let files = JSON.parse(xhr.responseText);
+        resolve(files);
+      }
+    }
+    xhr.onerror = function(){
+      console.log("error");
+      reject();
+    }
+    xhr.send();
+  });
 }
 
 function switchPage(index) {
@@ -146,6 +195,11 @@ function switchPage(index) {
 async function createIndexIfNeeded(name){
   if (currentFileName != name) {
     let xml = await tmxStore.getItem(name);
+    if (!xml) {
+      updateStatus("下载XML中……");
+      await downloadAndSaveToIndexedDB(name);
+      xml = await tmxStore.getItem(name);
+    }
     updateStatus("解析XML中……");
     await sleep(100);
     tuList = await parseXML(xml,name);
