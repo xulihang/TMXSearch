@@ -28,7 +28,8 @@ function registerEvents(){
       updateHistory(newURL);
       switchPage(0);
     }else{
-      const newURL = window.location.origin + window.location.pathname+"?filename="+encodeURIComponent(currentFileName);
+      const keywords = document.getElementsByClassName("keywords")[0].value;
+      const newURL = window.location.origin + window.location.pathname+"?filename="+encodeURIComponent(currentFileName)+"&keywords="+encodeURIComponent(keywords);
       updateHistory(newURL);
       switchPage(1);
     }
