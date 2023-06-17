@@ -58,7 +58,10 @@ async function loadFilesList(){
     link.href="javascript:void(0);";
     link.innerText = key;
     link.addEventListener("click",function(){
-      console.log(key);
+      const newURL = window.location.origin + window.location.pathname + "?filename=" + encodeURIComponent(currentFileName);
+      if (newURL != window.location.href) {
+        history.pushState(null, null, newURL);
+      }
       switchPage(1);
       createIndexIfNeeded(key);
     })
@@ -226,6 +229,10 @@ function search(){
       const item = buildSearchResultItem(count,resultIndex,tuList[resultIndex]);
       container.appendChild(item);
     }
+  }
+  const newURL = window.location.origin + window.location.pathname + "?filename=" + encodeURIComponent(currentFileName) + "&keywords=" + encodeURIComponent(keywords);
+  if (newURL != window.location.href) {
+    history.pushState(null, null, newURL);
   }
 }
 
