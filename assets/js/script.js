@@ -424,10 +424,16 @@ function viewSegmentsNearBy(id){
     const tu = tuList[index];
     const item = document.createElement("div");
     const title = document.createElement("h3");
-    title.innerText = count;
     if (index === id) {
       title.id = "matched";
     }
+    const link = document.createElement("a");
+    link.innerText = count;
+    link.href = "javascript:void(0);"
+    link.addEventListener("click",function(){
+      viewSegmentsNearBy(index);
+    })
+    title.appendChild(link);
     const content = document.createElement("p");
     content.innerHTML = getContent(tu);
     item.appendChild(title);
