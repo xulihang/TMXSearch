@@ -206,9 +206,9 @@ async function createIndexIfNeeded(name){
       await downloadAndSaveToIndexedDB(name);
       xml = await tmxStore.getItem(name);
     }
+    updateStatus(localize("解析XML中……"));
     tuList = await tuStore.getItem(name);
     if (!tuList) {
-      updateStatus(localize("解析XML中……"));
       await sleep(100);
       tuList = await parseXML(xml,name);
       await tuStore.setItem(name,tuList);
@@ -216,6 +216,15 @@ async function createIndexIfNeeded(name){
     updateStatus(localize("建立索引中……"));
     await sleep(100);
     createIndex();
+    const saved = await localforage.getItem(name);
+    if (saved) {
+      await loadIndex(name);
+    }else{
+      addDocuments();
+      await saveIndex(name);
+      console.log("saved");
+      await localforage.setItem(name, "saved");
+    }
     updateStatus("");
     currentFileName = name;
   }
@@ -298,9 +307,40 @@ function createIndex(){
           index: createIndexConfiguration(keys)
       }
     });
-    for (let index = 0; index < tuList.length; index++) {
-      const tu = tuList[index];
-      documentIndex.add(index,tu);
+  }
+}
+
+function addDocuments(){
+  for (let index = 0; index < tuList.length; index++) {
+    const tu = tuList[index];
+    documentIndex.add(index,tu);
+  }
+}
+
+async function saveIndex(name){
+  return new Promise(async function(resolve){
+    let count = 0;
+    let numberOfKeyToExport = Object.keys(documentIndex.index).length*3 + 3;
+    documentIndex.export(async function(key, data){ 
+      // you need to store both the key and the data!
+      // e.g. use the key for the filename and save your data
+      console.log("save"+key);
+      await localforage.setItem(name+"-"+key, data);
+      count = count + 1;
+      if (count === numberOfKeyToExport) {
+        resolve();
+      }
+    });
+  });
+}
+
+async function loadIndex(name){
+  const keys = await localforage.keys();
+  for (let index = 0; index < keys.length; index++) {
+    const key = keys[index];
+    if (key != name && key.split("-")[0] === name) {
+      const content = await localforage.getItem(key);
+      documentIndex.import(key.split("-")[1],content);
     }
   }
 }
