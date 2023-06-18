@@ -2,8 +2,8 @@ let tmxStore = localforage.createInstance({
   name: "tmx"
 });
 
-let indexStore = localforage.createInstance({
-  name: "index"
+let tuStore = localforage.createInstance({
+  name: "tu"
 });
 
 let currentFileName = "";
@@ -206,9 +206,13 @@ async function createIndexIfNeeded(name){
       await downloadAndSaveToIndexedDB(name);
       xml = await tmxStore.getItem(name);
     }
-    updateStatus(localize("解析XML中……"));
-    await sleep(100);
-    tuList = await parseXML(xml,name);
+    tuList = await tuStore.getItem(name);
+    if (!tuList) {
+      updateStatus(localize("解析XML中……"));
+      await sleep(100);
+      tuList = await parseXML(xml,name);
+      await tuStore.setItem(name,tuList);
+    }
     updateStatus(localize("建立索引中……"));
     await sleep(100);
     createIndex();
