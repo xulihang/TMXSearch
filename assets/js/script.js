@@ -496,7 +496,18 @@ function updateHistory(newURL){
 
 async function deleteCurrentFile(){
   if (currentFileName) {
+    updateStatus(localize("删除中……"));
     await tmxStore.removeItem(currentFileName);
+    await tuStore.removeItem(currentFileName);
+    const keys = await localforage.keys();
+    for (let index = 0; index < keys.length; index++) {
+      const key = keys[index];
+      if (key.split("-")[0] === currentFileName) {
+        await localforage.removeItem(key);
+      }
+    }
+    currentFileName = "";
+    updateStatus("");
     const newURL = window.location.origin + window.location.pathname;
     updateHistory(newURL);
     loadFilesList();
@@ -509,7 +520,8 @@ function localize(str){
     let translations = {
       "下载XML中……":"Downloading XML...",
       "解析XML中……":"Parsing XML...",
-      "建立索引中……":"Indexing..."
+      "建立索引中……":"Indexing...",
+      "删除中……":"Deleting..."
     }
     if (str in translations) {
       return translations[str];
