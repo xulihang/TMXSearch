@@ -23,5 +23,8 @@
   .search-bar {
     width: 100%;
   }
+  .keywords {
+    flex-grow: 1;
+  }
 }
 
